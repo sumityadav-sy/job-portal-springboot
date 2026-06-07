@@ -1,4 +1,7 @@
 package com.sumit.jobportal.entity;
+import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.*;
 import lombok.Data;
@@ -25,4 +28,8 @@ public class User {
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false)
     private Role role;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "recruiter", cascade = CascadeType.ALL)
+    private List<Job> postedJobs;
 }
