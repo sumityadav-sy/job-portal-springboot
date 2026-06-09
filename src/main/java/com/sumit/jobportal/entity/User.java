@@ -1,4 +1,5 @@
 package com.sumit.jobportal.entity;
+
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -32,4 +33,18 @@ public class User {
     @JsonIgnore
     @OneToMany(mappedBy = "recruiter", cascade = CascadeType.ALL)
     private List<Job> postedJobs;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "applicant", cascade = CascadeType.ALL)
+    private List<Application> appliedApplications;
+
+    public User(){}
+
+    public List<Application> getAppliedApplications() {
+        return appliedApplications;
+    }
+
+    public void setAppliedApplications(List<Application> appliedApplications) {
+        this.appliedApplications = appliedApplications;
+    }
 }

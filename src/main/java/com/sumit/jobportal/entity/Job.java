@@ -2,7 +2,11 @@ package com.sumit.jobportal.entity;
 
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "jobs")
@@ -24,28 +28,76 @@ public class Job {
     @JoinColumn(name = "recruiter_id")
     private User recruiter;
 
-    public Job() {}
+    @JsonIgnore
+    @OneToMany(mappedBy = "job", cascade = CascadeType.ALL)
+    private List<Application> receivedApplications;
+
+    public Job() {
+    }
 
     // Getters and Setters
 
-    public int getJobId() { return jobId; }
-    public void setJobId(int jobId) { this.jobId = jobId; }
+    public int getJobId() {
+        return jobId;
+    }
 
-    public String getTitle() { return title; }
-    public void setTitle(String title) { this.title = title; }
+    public void setJobId(int jobId) {
+        this.jobId = jobId;
+    }
 
-    public String getCompany() { return company; }
-    public void setCompany(String company) { this.company = company; }
+    public String getTitle() {
+        return title;
+    }
 
-    public String getLocation() { return location; }
-    public void setLocation(String location) { this.location = location; }
+    public void setTitle(String title) {
+        this.title = title;
+    }
 
-    public int getSalary() { return salary; }
-    public void setSalary(int salary) { this.salary = salary; }
+    public String getCompany() {
+        return company;
+    }
 
-    public LocalDateTime getPostedAt() { return postedAt; }
-    public void setPostedAt(LocalDateTime postedAt) { this.postedAt = postedAt; }
+    public void setCompany(String company) {
+        this.company = company;
+    }
 
-    public User getRecruiter() { return recruiter; }
-    public void setRecruiter(User recruiter) { this.recruiter = recruiter; }
+    public String getLocation() {
+        return location;
+    }
+
+    public void setLocation(String location) {
+        this.location = location;
+    }
+
+    public int getSalary() {
+        return salary;
+    }
+
+    public void setSalary(int salary) {
+        this.salary = salary;
+    }
+
+    public LocalDateTime getPostedAt() {
+        return postedAt;
+    }
+
+    public void setPostedAt(LocalDateTime postedAt) {
+        this.postedAt = postedAt;
+    }
+
+    public User getRecruiter() {
+        return recruiter;
+    }
+
+    public void setRecruiter(User recruiter) {
+        this.recruiter = recruiter;
+    }
+
+    public List<Application> getReceivedApplications() {
+        return receivedApplications;
+    }
+
+    public void setReceivedApplications(List<Application> receivedApplications) {
+        this.receivedApplications = receivedApplications;
+    }
 }
