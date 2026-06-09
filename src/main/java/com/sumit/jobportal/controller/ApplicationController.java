@@ -1,7 +1,7 @@
 
 package com.sumit.jobportal.controller;
 
-import com.sumit.jobportal.entity.Application;
+import com.sumit.jobportal.dto.ApplicationResponseDTO;
 import com.sumit.jobportal.entity.ApplicationStatus;
 import com.sumit.jobportal.service.ApplicationService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,30 +19,30 @@ public class ApplicationController {
 
     // POST /applications?userId=1&jobId=2
     @PostMapping
-    public ResponseEntity<Application> applyForJob(@RequestParam int userId,
+    public ResponseEntity<ApplicationResponseDTO>  applyForJob(@RequestParam int userId,
                                                     @RequestParam int jobId) {
-        Application application = applicationService.applyForJob(userId, jobId);
+        ApplicationResponseDTO application = applicationService.applyForJob(userId, jobId);
         return ResponseEntity.ok(application);
     }
 
     // PUT /applications/3/status?recruiterId=1&status=REVIEWED
     @PutMapping("/{id}/status")
-    public ResponseEntity<Application> updateStatus(@PathVariable int id,
+    public ResponseEntity<ApplicationResponseDTO> updateStatus(@PathVariable int id,
                                                      @RequestParam int recruiterId,
                                                      @RequestParam ApplicationStatus status) {
-        Application updated = applicationService.updateStatus(id, recruiterId, status);
+        ApplicationResponseDTO updated = applicationService.updateStatus(id, recruiterId, status);
         return ResponseEntity.ok(updated);
     }
 
     // GET /applications/user/1
     @GetMapping("/user/{userId}")
-    public ResponseEntity<List<Application>> getApplicationsByUser(@PathVariable int userId) {
+    public ResponseEntity<List<ApplicationResponseDTO>> getApplicationsByUser(@PathVariable int userId) {
         return ResponseEntity.ok(applicationService.getApplicationsByUser(userId));
     }
 
     // GET /applications/job/2
     @GetMapping("/job/{jobId}")
-    public ResponseEntity<List<Application>> getApplicationsByJob(@PathVariable int jobId) {
+    public ResponseEntity<List<ApplicationResponseDTO>> getApplicationsByJob(@PathVariable int jobId) {
         return ResponseEntity.ok(applicationService.getApplicationsByJob(jobId));
     }
 

@@ -1,5 +1,6 @@
 package com.sumit.jobportal.service;
 
+import com.sumit.jobportal.dto.ApplicationResponseDTO;
 import com.sumit.jobportal.entity.*;
 import com.sumit.jobportal.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +22,7 @@ public class ApplicationService {
 
     // ─── APPLY FOR A JOB ───────────────────────────────────────────────
 
-    public Application applyForJob(int userId, int jobId) {
+    public ApplicationResponseDTO applyForJob(int userId, int jobId) {
 
         // 1. Check user exists
         User applicant = userRepository.findById(userId)
@@ -29,30 +30,32 @@ public class ApplicationService {
 
         // 2. Only JOB_SEEKER can apply — same check you had, now with enum
         if (applicant.getRole() != Role.JOB_SEEKER) {
-            throw new RuntimeException("Only job seekers can apply for jobs. User " + userId + " is a " + applicant.getRole());
+            throw new RuntimeException(
+                    "Only job seekers can apply for jobs. User " + userId + " is a " + applicant.getRole());
         }
 
         // 3. Check job exists
         Job job = jobRepository.findById(jobId)
                 .orElseThrow(() -> new RuntimeException("Job not found with id: " + jobId));
 
-        // 4. Prevent duplicate application — your existsByJobAndUser, now as a derived query
+        // 4. Prevent duplicate application — your existsByJobAndUser, now as a derived
+        // query
         if (applicationRepository.existsByApplicantAndJob(applicant, job)) {
             throw new RuntimeException("You have already applied for this job.");
         }
 
         // 5. Build and save application
         Application application = new Application();
-        application.setApplicant(applicant);   // full User object, not just ID
-        application.setJob(job);               // full Job object, not just ID
-        application.setStatus(ApplicationStatus.APPLIED);  // enum, not string
+        application.setApplicant(applicant); // full User object, not just ID
+        application.setJob(job); // full Job object, not just ID
+        application.setStatus(ApplicationStatus.APPLIED); // enum, not string
 
-        return applicationRepository.save(application);
+        return convertToDTO(applicationRepository.save(application));
     }
 
     // ─── UPDATE APPLICATION STATUS (RECRUITER ONLY) ────────────────────
 
-    public Application updateStatus(int applicationId, int recruiterId, ApplicationStatus newStatus) {
+    public ApplicationResponseDTO updateStatus(int applicationId, int recruiterId, ApplicationStatus newStatus) {
 
         // 1. Check application exists
         Application application = applicationRepository.findById(applicationId)
@@ -81,25 +84,30 @@ public class ApplicationService {
 
         // 6. Update and save
         application.setStatus(newStatus);
-        return applicationRepository.save(application);
+        return convertToDTO(applicationRepository.save(application));
     }
 
     // ─── GET ALL APPLICATIONS BY A USER ────────────────────────────────
 
-    public List<Application> getApplicationsByUser(int userId) {
+    public List<ApplicationResponseDTO> getApplicationsByUser(int userId) {
         User applicant = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
-        return applicationRepository.findByApplicant(applicant);
+        return applicationRepository.findByApplicant(applicant)
+                .stream()
+                .map(app -> convertToDTO(app))
+                .toList();
     }
 
     // ─── GET ALL APPLICATIONS FOR A JOB ────────────────────────────────
 
-    public List<Application> getApplicationsByJob(int jobId) {
+    public List<ApplicationResponseDTO> getApplicationsByJob(int jobId) {
         Job job = jobRepository.findById(jobId)
                 .orElseThrow(() -> new RuntimeException("Job not found with id: " + jobId));
-        return applicationRepository.findByJob(job);
+        return applicationRepository.findByJob(job)
+                .stream()
+                .map(app -> convertToDTO(app))
+                .toList();
     }
-
     // ─── WITHDRAW APPLICATION (JOB SEEKER ONLY) ────────────────────────
 
     public void withdrawApplication(int applicationId, int userId) {
@@ -113,9 +121,12 @@ public class ApplicationService {
             throw new RuntimeException("You can only withdraw your own applications.");
         }
 
-        // 3. Can only withdraw if still APPLIED — no point withdrawing an ACCEPTED offer
+        // 3. Can only withdraw if still APPLIED — no point withdrawing an ACCEPTED
+        // offer
         if (application.getStatus() != ApplicationStatus.APPLIED) {
-            throw new RuntimeException("You can only withdraw an application that is still in APPLIED status. Current status: " + application.getStatus());
+            throw new RuntimeException(
+                    "You can only withdraw an application that is still in APPLIED status. Current status: "
+                            + application.getStatus());
         }
 
         applicationRepository.delete(application);
@@ -141,5 +152,18 @@ public class ApplicationService {
             default:
                 return false;
         }
+    }
+    
+    // Helper method for convrting application object into DTO
+    private ApplicationResponseDTO convertToDTO(Application application) {
+        return new ApplicationResponseDTO(
+                application.getApplicationId(),
+                application.getStatus().name(), // enum → String
+                application.getApplicant().getName(),
+                application.getApplicant().getEmail(),
+                application.getJob().getJobId(),
+                application.getJob().getTitle(),
+                application.getJob().getCompany(),
+                application.getJob().getRecruiter().getName());
     }
 }

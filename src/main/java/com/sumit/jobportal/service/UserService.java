@@ -1,12 +1,12 @@
 package com.sumit.jobportal.service;
 
 import com.sumit.jobportal.entity.User;
+import com.sumit.jobportal.dto.UserResponseDTO;
 import com.sumit.jobportal.entity.Role;
 import com.sumit.jobportal.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class UserService {
@@ -15,32 +15,35 @@ public class UserService {
     private UserRepository userRepository;
 
     // CREATE
-    public User registerUser(User user) {
+    public UserResponseDTO registerUser(User user) {
         // business rule: no duplicate emails
         if (userRepository.existsByEmail(user.getEmail())) {
             throw new RuntimeException("Email already registered: " + user.getEmail());
         }
-        return userRepository.save(user);
+        return convertToDTO(userRepository.save(user));
     }
 
     // READ ALL
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
+    public List<UserResponseDTO> getAllUsers() {
+        return userRepository.findAll()
+                .stream()
+                .map(user -> convertToDTO(user))
+                .toList();
     }
 
     // READ ONE
-    public User getUserById(int id) {
-        Optional<User> user = userRepository.findById(id);
-        if (user.isPresent()) {
-            return user.get();
-        } else {
-            throw new RuntimeException("User not found with id: " + id);
-        }
+    public UserResponseDTO getUserById(int id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
+        return convertToDTO(user);
     }
 
     // READ BY ROLE
-    public List<User> getUsersByRole(Role role) {
-        return userRepository.findByRole(role);
+    public List<UserResponseDTO> getUsersByRole(Role role) {
+        return userRepository.findByRole(role)
+                .stream()
+                .map(user -> convertToDTO(user))
+                .toList();
     }
 
     // DELETE
@@ -50,5 +53,15 @@ public class UserService {
         }
         userRepository.deleteById(id);
         return "User deleted successfully";
+    }
+
+    // Helper method to converting user to DTO
+    private UserResponseDTO convertToDTO(User user) {
+        return new UserResponseDTO(
+                user.getUserId(),
+                user.getName(),
+                user.getEmail(),
+                user.getRole().name() // enum → String e.g. "RECRUITER"
+        );
     }
 }

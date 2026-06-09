@@ -1,6 +1,7 @@
 package com.sumit.jobportal.controller;
 
 import com.sumit.jobportal.entity.User;
+import com.sumit.jobportal.dto.UserResponseDTO;
 import com.sumit.jobportal.entity.Role;
 import com.sumit.jobportal.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,7 +47,7 @@ public class UserController {
         try {
             // send user to service layer → service calls repository → saves to DB
             // returns the saved user (now has userId assigned by MySQL)
-            User saved = userService.registerUser(user);
+            UserResponseDTO saved = userService.registerUser(user);
 
             // ResponseEntity.status(HttpStatus.CREATED) = HTTP 201
             // 201 = "resource was successfully created" (more specific than 200)
@@ -70,7 +71,7 @@ public class UserController {
 
     // ResponseEntity<List<User>> = response will contain a List of Users
     // no <?> needed here because we always return List<User>, never an error string
-    public ResponseEntity<List<User>> getAllUsers() {
+    public ResponseEntity<List<UserResponseDTO>> getAllUsers() {
 
         // userService.getAllUsers() → repository.findAll() → SELECT * FROM users
         // ResponseEntity.ok() = HTTP 200 OK + the list as JSON array
@@ -109,7 +110,7 @@ public class UserController {
     // or      GET /api/users/role/RECRUITER
     @GetMapping("/role/{role}")
 
-    public ResponseEntity<List<User>> getUsersByRole(
+    public ResponseEntity<List<UserResponseDTO>> getUsersByRole(
 
             // @PathVariable extracts "JOB_SEEKER" from URL
             // Spring automatically converts String "JOB_SEEKER" → Role.JOB_SEEKER enum

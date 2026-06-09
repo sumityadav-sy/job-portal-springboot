@@ -21,6 +21,9 @@ public class Job {
     private String location;
     private int salary;
 
+    @Column(name = "description", length = 100)
+    private String description;
+
     @CreationTimestamp
     private LocalDateTime postedAt;
 
@@ -91,6 +94,14 @@ public class Job {
 
     public void setRecruiter(User recruiter) {
         this.recruiter = recruiter;
+    }
+
+    public String getDescription(){
+        return description;
+    }
+
+    public void setDescription(String des){
+        this.description= des;
     }
 
     public List<Application> getReceivedApplications() {
