@@ -1,6 +1,8 @@
 package com.sumit.jobportal.service;
 
 import com.sumit.jobportal.entity.User;
+import com.sumit.jobportal.exception.DuplicateResourceException;
+import com.sumit.jobportal.exception.ResourceNotFoundException;
 import com.sumit.jobportal.dto.UserResponseDTO;
 import com.sumit.jobportal.entity.Role;
 import com.sumit.jobportal.repository.UserRepository;
@@ -18,7 +20,7 @@ public class UserService {
     public UserResponseDTO registerUser(User user) {
         // business rule: no duplicate emails
         if (userRepository.existsByEmail(user.getEmail())) {
-            throw new RuntimeException("Email already registered: " + user.getEmail());
+            throw new DuplicateResourceException("Email already registered: " + user.getEmail());
         }
         return convertToDTO(userRepository.save(user));
     }
@@ -34,7 +36,7 @@ public class UserService {
     // READ ONE
     public UserResponseDTO getUserById(int id) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
+               .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
         return convertToDTO(user);
     }
 
@@ -49,7 +51,7 @@ public class UserService {
     // DELETE
     public String deleteUser(int id) {
         if (!userRepository.existsById(id)) {
-            throw new RuntimeException("User not found with id: " + id);
+            throw new ResourceNotFoundException("User not found with id: " + id);
         }
         userRepository.deleteById(id);
         return "User deleted successfully";

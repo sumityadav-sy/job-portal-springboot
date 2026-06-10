@@ -4,6 +4,9 @@ import com.sumit.jobportal.entity.User;
 import com.sumit.jobportal.dto.UserResponseDTO;
 import com.sumit.jobportal.entity.Role;
 import com.sumit.jobportal.service.UserService;
+
+import jakarta.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -37,28 +40,15 @@ public class UserController {
 
     // ResponseEntity<?> = lets you control BOTH response body AND status code
     // <?> means "any type" — sometimes we return User, sometimes a String error
-    public ResponseEntity<?> registerUser(
+    public ResponseEntity<UserResponseDTO> registerUser(
 
             // @RequestBody = take the JSON from request body → convert to User object
             // Postman sends: { "name":"Sumit", "email":"sumit@gmail.com", ... }
             // Spring converts that JSON → User java object automatically
-            @RequestBody User user) {
+           @Valid @RequestBody User user) {
 
-        try {
-            // send user to service layer → service calls repository → saves to DB
-            // returns the saved user (now has userId assigned by MySQL)
-            UserResponseDTO saved = userService.registerUser(user);
-
-            // ResponseEntity.status(HttpStatus.CREATED) = HTTP 201
-            // 201 = "resource was successfully created" (more specific than 200)
-            // .body(saved) = put the saved User object in response (auto-converts to JSON)
-            return ResponseEntity.status(HttpStatus.CREATED).body(saved);
-
-        } catch (RuntimeException e) {
-            // if service throws exception (e.g. duplicate email)
-            // return HTTP 400 Bad Request + the error message as response body
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        }
+        UserResponseDTO saved = userService.registerUser(user);
+        return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
 
@@ -86,20 +76,13 @@ public class UserController {
     // {id} is a path variable — a placeholder in the URL
     @GetMapping("/{id}")
 
-    public ResponseEntity<?> getUserById(
+    public ResponseEntity<UserResponseDTO> getUserById(
 
             // @PathVariable = extract {id} from the URL and put it into int id
             // URL: /api/users/5  →  int id = 5  automatically
             @PathVariable int id) {
 
-        try {
-            // service finds user by id → if not found, throws RuntimeException
-            return ResponseEntity.ok(userService.getUserById(id));
-
-        } catch (RuntimeException e) {
-            // HTTP 404 Not Found + "User not found with id: 5"
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        }
+         return ResponseEntity.ok(userService.getUserById(id));
     }
 
 
@@ -130,13 +113,6 @@ public class UserController {
     // ResponseEntity<String> = response body will be a String message
     public ResponseEntity<String> deleteUser(@PathVariable int id) {
 
-        try {
-            // service deletes user → returns "User deleted successfully"
-            return ResponseEntity.ok(userService.deleteUser(id));
-
-        } catch (RuntimeException e) {
-            // if user not found → 404 + error message
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        }
+       return ResponseEntity.ok(userService.deleteUser(id));
     }
 }

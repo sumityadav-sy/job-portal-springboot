@@ -2,6 +2,10 @@ package com.sumit.jobportal.service;
 
 import com.sumit.jobportal.dto.ApplicationResponseDTO;
 import com.sumit.jobportal.entity.*;
+import com.sumit.jobportal.exception.DuplicateResourceException;
+import com.sumit.jobportal.exception.InvalidInputException;
+import com.sumit.jobportal.exception.ResourceNotFoundException;
+import com.sumit.jobportal.exception.UnauthorizedActionException;
 import com.sumit.jobportal.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -26,22 +30,24 @@ public class ApplicationService {
 
         // 1. Check user exists
         User applicant = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
+
 
         // 2. Only JOB_SEEKER can apply — same check you had, now with enum
         if (applicant.getRole() != Role.JOB_SEEKER) {
-            throw new RuntimeException(
-                    "Only job seekers can apply for jobs. User " + userId + " is a " + applicant.getRole());
+           throw new UnauthorizedActionException(
+                "Only job seekers can apply for jobs. User " + userId + " is a " + applicant.getRole());
         }
 
         // 3. Check job exists
         Job job = jobRepository.findById(jobId)
-                .orElseThrow(() -> new RuntimeException("Job not found with id: " + jobId));
+              .orElseThrow(() -> new ResourceNotFoundException("Job not found with id: " + jobId));
+
 
         // 4. Prevent duplicate application — your existsByJobAndUser, now as a derived
         // query
         if (applicationRepository.existsByApplicantAndJob(applicant, job)) {
-            throw new RuntimeException("You have already applied for this job.");
+            throw new DuplicateResourceException("You have already applied for this job.");
         }
 
         // 5. Build and save application
@@ -59,27 +65,27 @@ public class ApplicationService {
 
         // 1. Check application exists
         Application application = applicationRepository.findById(applicationId)
-                .orElseThrow(() -> new RuntimeException("Application not found with id: " + applicationId));
+              .orElseThrow(() -> new ResourceNotFoundException("Application not found with id: " + applicationId));
 
         // 2. Check recruiter exists
         User recruiter = userRepository.findById(recruiterId)
-                .orElseThrow(() -> new RuntimeException("User not found with id: " + recruiterId));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + recruiterId));
 
         // 3. Must be a RECRUITER
         if (recruiter.getRole() != Role.RECRUITER) {
-            throw new RuntimeException("Only recruiters can update application status.");
+             throw new UnauthorizedActionException("Only recruiters can update application status.");
         }
 
         // 4. Recruiter must own the job this application belongs to
         // application.getJob().getRecruiter() gives us the job's recruiter
         if (application.getJob().getRecruiter().getUserId() != recruiterId) {
-            throw new RuntimeException("You can only update applications for your own job postings.");
+            throw new UnauthorizedActionException("You can only update applications for your own job postings.");
         }
 
         // 5. Validate status transition — your logic, now with enums
         if (!isValidTransition(application.getStatus(), newStatus)) {
-            throw new RuntimeException("Invalid status transition from "
-                    + application.getStatus() + " to " + newStatus);
+            throw new InvalidInputException("Invalid status transition from "
+                + application.getStatus() + " to " + newStatus);
         }
 
         // 6. Update and save
@@ -91,7 +97,7 @@ public class ApplicationService {
 
     public List<ApplicationResponseDTO> getApplicationsByUser(int userId) {
         User applicant = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
         return applicationRepository.findByApplicant(applicant)
                 .stream()
                 .map(app -> convertToDTO(app))
@@ -102,7 +108,7 @@ public class ApplicationService {
 
     public List<ApplicationResponseDTO> getApplicationsByJob(int jobId) {
         Job job = jobRepository.findById(jobId)
-                .orElseThrow(() -> new RuntimeException("Job not found with id: " + jobId));
+                .orElseThrow(() -> new ResourceNotFoundException("Job not found with id: " + jobId));
         return applicationRepository.findByJob(job)
                 .stream()
                 .map(app -> convertToDTO(app))
@@ -114,19 +120,19 @@ public class ApplicationService {
 
         // 1. Check application exists
         Application application = applicationRepository.findById(applicationId)
-                .orElseThrow(() -> new RuntimeException("Application not found with id: " + applicationId));
+                .orElseThrow(() -> new ResourceNotFoundException("Application not found with id: " + applicationId));
 
         // 2. Only the applicant who applied can withdraw their own application
         if (application.getApplicant().getUserId() != userId) {
-            throw new RuntimeException("You can only withdraw your own applications.");
+            throw new UnauthorizedActionException("You can only withdraw your own applications.");
         }
 
         // 3. Can only withdraw if still APPLIED — no point withdrawing an ACCEPTED
         // offer
         if (application.getStatus() != ApplicationStatus.APPLIED) {
-            throw new RuntimeException(
-                    "You can only withdraw an application that is still in APPLIED status. Current status: "
-                            + application.getStatus());
+            throw new InvalidInputException(
+                "You can only withdraw an application that is still in APPLIED status. Current status: "
+                        + application.getStatus());
         }
 
         applicationRepository.delete(application);
