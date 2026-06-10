@@ -55,6 +55,14 @@ public class JobService {
                 .toList();
     }
 
+    // Search jobs with optional filters
+    public List<JobResponseDTO> searchJobs(String title, String location, Integer minSalary) {
+        return jobRepository.searchJobs(title, location, minSalary)
+                .stream()
+                .map(job -> convertToDTO(job))
+                .toList();
+    }
+
     // Get job by id
     public JobResponseDTO getJobById(int id) {
         Job job = jobRepository.findById(id)

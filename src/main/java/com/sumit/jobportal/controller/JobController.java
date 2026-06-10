@@ -21,8 +21,8 @@ public class JobController {
 
     // POST /jobs?recruiterId=1
     @PostMapping
-    public ResponseEntity<JobResponseDTO>  postJob(@Valid @RequestBody Job job,
-                                       @RequestParam int recruiterId) {
+    public ResponseEntity<JobResponseDTO> postJob(@Valid @RequestBody Job job,
+            @RequestParam int recruiterId) {
         JobResponseDTO saved = jobService.postJob(job, recruiterId);
         return ResponseEntity.ok(saved);
     }
@@ -31,6 +31,17 @@ public class JobController {
     @GetMapping
     public ResponseEntity<List<JobResponseDTO>> getAllJobs() {
         return ResponseEntity.ok(jobService.getAllJobs());
+    }
+
+    // GET /jobs/search?title=Backend&location=Bangalore&minSalary=80000
+    // all params optional — any combination works, including none
+    @GetMapping("/search")
+    public ResponseEntity<List<JobResponseDTO>> searchJobs(
+            @RequestParam(required = false) String title,
+            @RequestParam(required = false) String location,
+            @RequestParam(required = false) Integer minSalary) {
+
+        return ResponseEntity.ok(jobService.searchJobs(title, location, minSalary));
     }
 
     // GET /jobs/5
