@@ -1,6 +1,6 @@
 package com.sumit.jobportal.controller;
 
-import com.sumit.jobportal.entity.User;
+import com.sumit.jobportal.dto.UserRequestDTO;
 import com.sumit.jobportal.dto.UserResponseDTO;
 import com.sumit.jobportal.entity.Role;
 import com.sumit.jobportal.service.UserService;
@@ -45,7 +45,7 @@ public class UserController {
             // @RequestBody = take the JSON from request body → convert to User object
             // Postman sends: { "name":"Sumit", "email":"sumit@gmail.com", ... }
             // Spring converts that JSON → User java object automatically
-           @Valid @RequestBody User user) {
+           @Valid @RequestBody UserRequestDTO user) {
 
         UserResponseDTO saved = userService.registerUser(user);
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);

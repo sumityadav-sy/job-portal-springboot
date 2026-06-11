@@ -1,7 +1,7 @@
 package com.sumit.jobportal.controller;
 
+import com.sumit.jobportal.dto.JobRequestDTO;
 import com.sumit.jobportal.dto.JobResponseDTO;
-import com.sumit.jobportal.entity.Job;
 import com.sumit.jobportal.service.JobService;
 
 import jakarta.validation.Valid;
@@ -21,7 +21,7 @@ public class JobController {
 
     // POST /jobs?recruiterId=1
     @PostMapping
-    public ResponseEntity<JobResponseDTO> postJob(@Valid @RequestBody Job job,
+    public ResponseEntity<JobResponseDTO> postJob(@Valid @RequestBody JobRequestDTO job,
             @RequestParam int recruiterId) {
         JobResponseDTO saved = jobService.postJob(job, recruiterId);
         return ResponseEntity.ok(saved);

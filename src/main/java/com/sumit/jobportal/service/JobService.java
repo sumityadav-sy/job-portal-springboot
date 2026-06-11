@@ -1,5 +1,6 @@
 package com.sumit.jobportal.service;
 
+import com.sumit.jobportal.dto.JobRequestDTO;
 import com.sumit.jobportal.dto.JobResponseDTO;
 import com.sumit.jobportal.entity.Job;
 import com.sumit.jobportal.entity.User;
@@ -26,24 +27,30 @@ public class JobService {
     private UserRepository userRepository;
 
     // Post a new job
-    public JobResponseDTO postJob(Job job, int recruiterId) {
+    public JobResponseDTO postJob(JobRequestDTO request, int recruiterId) {
         User recruiter = userRepository.findById(recruiterId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + recruiterId));
 
-        // Role check — only RECRUITER can post jobs
         if (recruiter.getRole() != Role.RECRUITER) {
             throw new UnauthorizedActionException(
                     "Only recruiters can post jobs. User " + recruiterId + " is a " + recruiter.getRole());
         }
 
-        // duplicate check — same title + company + recruiter
         if (jobRepository.existsByTitleAndCompanyAndRecruiter(
-                job.getTitle(), job.getCompany(), recruiter)) {
+                request.getTitle(), request.getCompany(), recruiter)) {
             throw new DuplicateResourceException(
-                    "You have already posted a job for '" + job.getTitle() + "' at " + job.getCompany());
+                    "You have already posted a job for '" + request.getTitle() + "' at " + request.getCompany());
         }
 
+        // map DTO → entity
+        Job job = new Job();
+        job.setTitle(request.getTitle());
+        job.setCompany(request.getCompany());
+        job.setLocation(request.getLocation());
+        job.setSalary(request.getSalary());
+        job.setDescription(request.getDescription());
         job.setRecruiter(recruiter);
+
         return convertToDTO(jobRepository.save(job));
     }
 

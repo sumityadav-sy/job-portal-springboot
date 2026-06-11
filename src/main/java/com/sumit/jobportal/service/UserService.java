@@ -3,6 +3,7 @@ package com.sumit.jobportal.service;
 import com.sumit.jobportal.entity.User;
 import com.sumit.jobportal.exception.DuplicateResourceException;
 import com.sumit.jobportal.exception.ResourceNotFoundException;
+import com.sumit.jobportal.dto.UserRequestDTO;
 import com.sumit.jobportal.dto.UserResponseDTO;
 import com.sumit.jobportal.entity.Role;
 import com.sumit.jobportal.repository.UserRepository;
@@ -17,11 +18,18 @@ public class UserService {
     private UserRepository userRepository;
 
     // CREATE
-    public UserResponseDTO registerUser(User user) {
-        // business rule: no duplicate emails
-        if (userRepository.existsByEmail(user.getEmail())) {
-            throw new DuplicateResourceException("Email already registered: " + user.getEmail());
+    public UserResponseDTO registerUser(UserRequestDTO request) {
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new DuplicateResourceException("Email already registered: " + request.getEmail());
         }
+
+        // map DTO → entity
+        User user = new User();
+        user.setName(request.getName());
+        user.setEmail(request.getEmail());
+        user.setPassword(request.getPassword());
+        user.setRole(request.getRole());
+
         return convertToDTO(userRepository.save(user));
     }
 
@@ -36,7 +44,7 @@ public class UserService {
     // READ ONE
     public UserResponseDTO getUserById(int id) {
         User user = userRepository.findById(id)
-               .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
         return convertToDTO(user);
     }
 
