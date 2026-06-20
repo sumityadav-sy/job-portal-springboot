@@ -3,11 +3,13 @@ package com.sumit.jobportal.service;
 import com.sumit.jobportal.entity.User;
 import com.sumit.jobportal.exception.DuplicateResourceException;
 import com.sumit.jobportal.exception.ResourceNotFoundException;
+import com.sumit.jobportal.exception.UnauthorizedActionException;
 import com.sumit.jobportal.dto.UserRequestDTO;
 import com.sumit.jobportal.dto.UserResponseDTO;
 import com.sumit.jobportal.entity.Role;
 import com.sumit.jobportal.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import java.util.List;
 
@@ -16,6 +18,10 @@ public class UserService {
 
     @Autowired
     private UserRepository userRepository;
+
+    // Inject the BCryptPasswordEncoder bean we just created
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     // CREATE
     public UserResponseDTO registerUser(UserRequestDTO request) {
@@ -27,7 +33,10 @@ public class UserService {
         User user = new User();
         user.setName(request.getName());
         user.setEmail(request.getEmail());
-        user.setPassword(request.getPassword());
+        // THIS IS THE ONLY CHANGE — hash the password before saving
+        // passwordEncoder.encode() → BCrypt.hashpw() internally
+        // "mypassword123" → "$2a$10$N9qo8uLO..."
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setRole(request.getRole());
 
         return convertToDTO(userRepository.save(user));
@@ -56,14 +65,23 @@ public class UserService {
                 .toList();
     }
 
-    // DELETE
-    public String deleteUser(int id) {
-        if (!userRepository.existsById(id)) {
-            throw new ResourceNotFoundException("User not found with id: " + id);
-        }
-        userRepository.deleteById(id);
-        return "User deleted successfully";
+    public String deleteUser(int id, String requestingEmail) {
+    User target = userRepository.findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
+
+    // Either the user is deleting themselves, or a recruiter is doing it
+    boolean isSelf = target.getEmail().equals(requestingEmail);
+    User requester = userRepository.findByEmail(requestingEmail)
+            .orElseThrow(() -> new ResourceNotFoundException("Requester not found"));
+    boolean isRecruiter = requester.getRole() == Role.RECRUITER;
+
+    if (!isSelf && !isRecruiter) {
+        throw new UnauthorizedActionException("You can only delete your own account.");
     }
+
+    userRepository.deleteById(id);
+    return "User deleted successfully";
+}
 
     // Helper method to converting user to DTO
     private UserResponseDTO convertToDTO(User user) {

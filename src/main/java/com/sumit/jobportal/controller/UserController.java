@@ -10,6 +10,8 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
@@ -30,7 +32,6 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-
     // ─────────────────────────────────────────────────────
     // ENDPOINT 1 — CREATE USER
     // ─────────────────────────────────────────────────────
@@ -45,12 +46,11 @@ public class UserController {
             // @RequestBody = take the JSON from request body → convert to User object
             // Postman sends: { "name":"Sumit", "email":"sumit@gmail.com", ... }
             // Spring converts that JSON → User java object automatically
-           @Valid @RequestBody UserRequestDTO user) {
+            @Valid @RequestBody UserRequestDTO user) {
 
         UserResponseDTO saved = userService.registerUser(user);
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
-
 
     // ─────────────────────────────────────────────────────
     // ENDPOINT 2 — GET ALL USERS
@@ -68,7 +68,6 @@ public class UserController {
         return ResponseEntity.ok(userService.getAllUsers());
     }
 
-
     // ─────────────────────────────────────────────────────
     // ENDPOINT 3 — GET USER BY ID
     // ─────────────────────────────────────────────────────
@@ -79,18 +78,17 @@ public class UserController {
     public ResponseEntity<UserResponseDTO> getUserById(
 
             // @PathVariable = extract {id} from the URL and put it into int id
-            // URL: /api/users/5  →  int id = 5  automatically
+            // URL: /api/users/5 → int id = 5 automatically
             @PathVariable int id) {
 
-         return ResponseEntity.ok(userService.getUserById(id));
+        return ResponseEntity.ok(userService.getUserById(id));
     }
-
 
     // ─────────────────────────────────────────────────────
     // ENDPOINT 4 — GET USERS BY ROLE
     // ─────────────────────────────────────────────────────
     // handles GET /api/users/role/JOB_SEEKER
-    // or      GET /api/users/role/RECRUITER
+    // or GET /api/users/role/RECRUITER
     @GetMapping("/role/{role}")
 
     public ResponseEntity<List<UserResponseDTO>> getUsersByRole(
@@ -102,17 +100,15 @@ public class UserController {
         return ResponseEntity.ok(userService.getUsersByRole(role));
     }
 
-
     // ─────────────────────────────────────────────────────
     // ENDPOINT 5 — DELETE USER
     // ─────────────────────────────────────────────────────
-    // @DeleteMapping("/{id}") = handles DELETE /api/users/5
-    // DELETE = "I want to DELETE something"
-    @DeleteMapping("/{id}")
 
-    // ResponseEntity<String> = response body will be a String message
-    public ResponseEntity<String> deleteUser(@PathVariable int id) {
-
-       return ResponseEntity.ok(userService.deleteUser(id));
-    }
+  // Any authenticated user can delete — but service enforces "own account only"
+@DeleteMapping("/{id}")
+public ResponseEntity<String> deleteUser(
+        @PathVariable int id,
+        @AuthenticationPrincipal UserDetails currentUser) {
+    return ResponseEntity.ok(userService.deleteUser(id, currentUser.getUsername()));
+}
 }
