@@ -61,6 +61,16 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+		<dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>test</scope>
+        </dependency>
+		<dependency>
              <groupId>org.springframework.boot</groupId>
              <artifactId>spring-boot-starter-validation</artifactId>
         </dependency>
@@ -144,6 +154,49 @@
 					</execution>
 				</executions>
 			</plugin>
+		
+			 <!-- JaCoCo: Java Code Coverage -->
+        <plugin>
+            <groupId>org.jacoco</groupId>
+            <artifactId>jacoco-maven-plugin</artifactId>
+            <version>0.8.12</version>
+            <executions>
+
+                <!-- GOAL 1: prepare-agent -->
+                <!-- Runs BEFORE tests start -->
+                <!-- Instruments your bytecode so JaCoCo can track execution -->
+                <execution>
+                    <id>prepare-agent</id>
+                    <goals>
+                        <goal>prepare-agent</goal>
+                    </goals>
+                </execution>
+
+                <!-- GOAL 2: report -->
+                <!-- Runs AFTER tests complete -->
+                <!-- Reads tracking data → generates HTML/XML/CSV report -->
+                <execution>
+                    <id>report</id>
+                    <phase>test</phase>
+                    <goals>
+                        <goal>report</goal>
+                    </goals>
+                </execution>
+
+            </executions>
+
+            <configuration>
+                <!-- Exclude classes that aren't worth measuring -->
+                <!-- DTOs, entity classes, the main app class -->
+                <!-- These have no logic — measuring them inflates/deflates numbers misleadingly -->
+                <excludes>
+                    <exclude>com/sumit/jobportal/dto/**</exclude>
+                    <exclude>com/sumit/jobportal/entity/**</exclude>
+                    <exclude>com/sumit/jobportal/JobportalApplication.class</exclude>
+                </excludes>
+            </configuration>
+
+        </plugin>
 		</plugins>
 	</build>
 
