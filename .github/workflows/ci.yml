@@ -43,6 +43,7 @@ jobs:
           SPRING_DATASOURCE_URL: jdbc:mysql://127.0.0.1:3306/jobportal?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
           SPRING_DATASOURCE_USERNAME: root
           SPRING_DATASOURCE_PASSWORD: root
+          JWT_SECRET: test-secret-key-for-ci-minimum-32-characters-long
 
   # ─── JOB 2: Build Docker image and push to Docker Hub ─────
   docker:

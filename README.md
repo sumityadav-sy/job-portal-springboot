@@ -1,4 +1,4 @@
-![CI](https://github.com/sumityadav-sy/jobportal/actions/workflows/ci.yml/badge.svg)
+![CI](https://github.com/sumityadav-sy/job-portal-springboot/actions/workflows/ci.yml/badge.svg)
 
 ## Testing
 
