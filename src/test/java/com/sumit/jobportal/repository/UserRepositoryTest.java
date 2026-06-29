@@ -7,6 +7,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 
 import java.util.List;
@@ -20,6 +21,10 @@ import static org.junit.jupiter.api.Assertions.*;
 // - EntityManager, transaction management
 // Nothing else — no controllers, no services, no security
 @DataJpaTest
+
+@ActiveProfiles("test")   // ← tells Spring: activate the "test" profile
+                          // this makes it load application-test.properties
+                          
 // @TestPropertySource loads our H2 config instead of application.properties
 @TestPropertySource(locations = "classpath:application-test.properties")
 class UserRepositoryTest {
