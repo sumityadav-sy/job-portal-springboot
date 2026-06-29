@@ -1,3 +1,5 @@
+![CI](https://github.com/sumityadav-sy/jobportal/actions/workflows/ci.yml/badge.svg)
+
 ## Testing
 
 This project has a comprehensive automated test suite covering the service, 
