@@ -7,6 +7,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
@@ -18,6 +19,9 @@ import static org.junit.jupiter.api.Assertions.*;
 @DataJpaTest
 @ActiveProfiles("test")
 @TestPropertySource(locations = "classpath:application-test.properties")
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+// ↑ CRITICAL: tells @DataJpaTest "don't replace my datasource with your own"
+// without this, @DataJpaTest ignores your H2 URL and uses its default embedded DB
 class JobRepositoryTest {
 
     @Autowired
