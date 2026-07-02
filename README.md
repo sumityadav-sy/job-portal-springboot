@@ -1,5 +1,17 @@
 # Job Portal — Spring Boot REST API
 
+
+**Live API:** https://job-portal-springboot-2mj4.onrender.com
+
+**Swagger UI:** https://job-portal-springboot-2mj4.onrender.com/swagger-ui/index.html
+
+> ⚠️ **Cold start notice**
+> This runs on Render's free tier, which spins the service down after periods of inactivity.
+> - The **first request after idle takes ~1–2 minutes** to wake the service
+> - This is a hosting-tier limitation, not an application issue
+> - Subsequent requests are fast until it goes idle again
+>
+
 [![CI Pipeline](https://github.com/sumityadav-sy/job-portal-springboot/actions/workflows/ci.yml/badge.svg)](https://github.com/sumityadav-sy/job-portal-springboot/actions/workflows/ci.yml)
 [![Java](https://img.shields.io/badge/Java-21-orange)](https://openjdk.org/projects/jdk/21/)
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.x-brightgreen)](https://spring.io/projects/spring-boot)
@@ -11,8 +23,8 @@
 [![Swagger](https://img.shields.io/badge/API%20Docs-Swagger%20UI-85EA2D)](https://job-portal-springboot-2mj4.onrender.com/swagger-ui/index.html)
 [![Live](https://img.shields.io/badge/Live-Render-46E3B7)](https://job-portal-springboot-2mj4.onrender.com)
 
----
-> A production-style, fully deployed REST API for a job portal — recruiters post jobs, job seekers apply, and applications move through a review pipeline.
+
+> ## A production-style, fully deployed REST API for a job portal — recruiters post jobs, job seekers apply, and applications move through a review pipeline.
 >
 > Built to demonstrate real backend engineering practices:
 > - Layered architecture (Controller → Service → Repository)
@@ -21,17 +33,6 @@
 > - Multi-stage Docker build + GitHub Actions CI/CD shipping straight to production
 > - Live deployment on Render with a managed MySQL database on Aiven
 
----
-🔗 **Live API:** https://job-portal-springboot-2mj4.onrender.com
-
-📘 **Swagger UI:** https://job-portal-springboot-2mj4.onrender.com/swagger-ui/index.html
-
-> ⚠️ **Cold start notice**
-> This runs on Render's free tier, which spins the service down after periods of inactivity.
-> - The **first request after idle takes ~1–2 minutes** to wake the service
-> - This is a hosting-tier limitation, not an application issue
-> - Subsequent requests are fast until it goes idle again
->
 
 ---
 
